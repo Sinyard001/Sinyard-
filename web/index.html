@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>智能合同工作台 · Contract Workbench</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="red-line"></div>
+  <header class="masthead">
+    <div class="masthead-row">
+      <div class="brand">
+        <span class="brand-mark">◆</span>
+        <span>智能合同工作台</span>
+      </div>
+      <div class="brand-sub">审查 · 问答 · 比对 · 管理</div>
+    </div>
+    <nav class="main-tabs" aria-label="功能切换">
+      <button class="main-tab active" data-section="review">01 审查工作台</button>
+      <button class="main-tab" data-section="qa">02 智能问答</button>
+      <button class="main-tab" data-section="compare">03 版本比对</button>
+      <button class="main-tab" data-section="ledger">04 合同台账</button>
+    </nav>
+  </header>
+
+  <main class="page">
+    <!-- ============ 01 审查工作台 ============ -->
+    <section id="section-review" class="work-section">
+      <div class="input-panel">
+        <div class="panel-title">
+          <span class="panel-index">01</span>
+          <h2>输入合同</h2>
+        </div>
+        <div class="input-toolbar">
+          <input id="title" class="title-input" type="text"
+                 placeholder="合同名称（可选），例如：软件开发服务合同">
+          <div class="toolbar-actions">
+            <button id="demoBtn" class="btn btn-outline" type="button">载入演示合同</button>
+            <label class="btn btn-outline upload-label">
+              上传合同文件
+              <input id="fileInput" type="file" accept=".txt,.docx">
+            </label>
+          </div>
+        </div>
+        <textarea id="contractText" spellcheck="false"
+          placeholder="在此粘贴合同正文（支持“第一条 / 第 1 条”等编号）&#10;&#10;也可以点击“载入演示合同”体验：条款标注、风险分级、多立场审查、缺失补漏、要素台账将一并生成。"></textarea>
+        <div class="action-row">
+          <button id="runBtn" class="btn btn-solid" type="button">开始智能审查</button>
+          <button id="clearBtn" class="btn btn-outline" type="button">清空</button>
+          <span id="statusText" class="status-text" role="status"></span>
+        </div>
+      </div>
+
+      <div id="report" class="report-panel hidden">
+        <div class="report-head">
+          <div>
+            <div class="panel-title report-title">
+              <span class="panel-index">02</span>
+              <h2>审查报告</h2>
+            </div>
+            <p id="reportMeta" class="meta"></p>
+          </div>
+          <div class="report-tools">
+            <button id="resetBtn" class="btn btn-outline small" type="button">重新审查</button>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <span class="stat-value" id="statClauses">0</span>
+            <span class="stat-label">识别条款</span>
+          </div>
+          <div class="stat-card stat-danger">
+            <span class="stat-value" id="statHigh">0</span>
+            <span class="stat-label">高风险</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statMedium">0</span>
+            <span class="stat-label">中风险</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statLow">0</span>
+            <span class="stat-label">提示</span>
+          </div>
+          <div class="stat-card stat-grade">
+            <span class="stat-value" id="statGrade">低</span>
+            <span class="stat-label">综合风险等级</span>
+          </div>
+        </div>
+
+        <nav class="sub-tabs" aria-label="报告内容切换">
+          <button class="sub-tab active" data-report-tab="clausesTab">条款标注</button>
+          <button class="sub-tab" data-report-tab="risksTab">风险与多立场</button>
+          <button class="sub-tab" data-report-tab="entitiesTab">台账要素提取</button>
+          <button class="sub-tab" data-report-tab="gapsTab">缺失条款补漏</button>
+        </nav>
+
+        <div id="clausesTab" class="report-tab active"></div>
+        <div id="risksTab" class="report-tab">
+          <div id="stanceSummary"></div>
+          <div id="riskList"></div>
+        </div>
+        <div id="entitiesTab" class="report-tab">
+          <div class="tab-toolbar">
+            <button id="saveLedgerBtn" class="btn btn-solid small" type="button">保存当前合同到台账</button>
+            <span id="saveLedgerStatus" class="status-text"></span>
+          </div>
+          <div id="entityTable"></div>
+          <div id="paymentPlan"></div>
+        </div>
+        <div id="gapsTab" class="report-tab">
+          <div id="gapList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 智能问答 ============ -->
+    <section id="section-qa" class="work-section hidden">
+      <div class="qa-panel">
+        <div class="panel-title">
+          <span class="panel-index">02</span>
+          <h2>合同智能问答</h2>
+        </div>
+        <p class="qa-hint">
+          问答基于当前已载入的合同文本（本地语义检索）。<br>
+          <span id="qaContext" class="muted">尚未载入合同，请先在“审查工作台”粘贴或上传合同。</span>
+        </p>
+        <div id="chatLog" class="chat-log">
+          <div class="chat-msg assistant">
+            <span class="chat-bubble">你好，我是合同审查助手。可以问我“违约责任怎么约定的？”“合同金额多少？”“付款计划是什么？”“有哪些风险？”等。</span>
+          </div>
+        </div>
+        <div class="suggestion-chips" id="qaSuggestions">
+          <button class="chip" data-question="违约责任怎么约定的？">违约责任</button>
+          <button class="chip" data-question="合同总金额是多少？">合同金额</button>
+          <button class="chip" data-question="付款计划是什么？">付款计划</button>
+          <button class="chip" data-question="合同期限是多久？">合同期限</button>
+          <button class="chip" data-question="当前合同有哪些风险？">风险总览</button>
+          <button class="chip" data-question="缺失了哪些条款？">缺失补漏</button>
+        </div>
+        <div class="qa-input-row">
+          <input id="qaInput" class="qa-input" type="text"
+                 placeholder="输入问题，例如：保密义务约定在哪些条款？">
+          <button id="qaSendBtn" class="btn btn-solid" type="button">发送</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 版本比对 ============ -->
+    <section id="section-compare" class="work-section hidden">
+      <div class="compare-panel">
+        <div class="panel-title">
+          <span class="panel-index">03</span>
+          <h2>合同版本比对</h2>
+        </div>
+        <div class="compare-grid">
+          <div class="version-box">
+            <div class="version-head">
+              <strong>旧版合同（A）</strong>
+              <button id="oldDemoBtn" class="btn btn-outline small" type="button">载入旧版演示</button>
+            </div>
+            <textarea id="oldText" class="compare-text" spellcheck="false"
+              placeholder="粘贴旧版合同全文，或点击载入演示。"></textarea>
+          </div>
+          <div class="version-box">
+            <div class="version-head">
+              <strong>新版合同（B）</strong>
+              <button id="newDemoBtn" class="btn btn-outline small" type="button">载入新版演示</button>
+            </div>
+            <textarea id="newText" class="compare-text" spellcheck="false"
+              placeholder="粘贴新版合同全文，或点击载入演示。"></textarea>
+          </div>
+        </div>
+        <div class="action-row">
+          <button id="compareBtn" class="btn btn-solid" type="button">开始比对</button>
+          <button id="useCurrentAsOld" class="btn btn-outline" type="button">使用当前合同作为旧版</button>
+          <span id="compareStatus" class="status-text"></span>
+        </div>
+        <div id="compareResult" class="compare-result hidden"></div>
+      </div>
+    </section>
+
+    <!-- ============ 04 合同台账 ============ -->
+    <section id="section-ledger" class="work-section hidden">
+      <div class="ledger-panel">
+        <div class="panel-title">
+          <span class="panel-index">04</span>
+          <h2>合同台账</h2>
+        </div>
+        <p class="qa-hint">
+          在“审查工作台 → 台账要素提取”中点击“保存当前合同到台账”，即可把核心要素沉淀到本地台账；
+          数据保存在当前浏览器，可随时导出 CSV 用 Excel 打开。
+        </p>
+        <div class="ledger-actions">
+          <button id="exportLedgerBtn" class="btn btn-outline" type="button">导出全部台账 CSV</button>
+          <button id="clearLedgerBtn" class="btn btn-outline danger" type="button">清空本地台账</button>
+          <span id="ledgerStatus" class="status-text"></span>
+        </div>
+        <div class="ledger-table-wrap">
+          <table class="ledger-table">
+            <thead>
+              <tr>
+                <th>保存时间</th>
+                <th>合同名称</th>
+                <th>甲方</th>
+                <th>乙方</th>
+                <th>合同金额</th>
+                <th>期限</th>
+                <th>风险等级</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="ledgerBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>本工具输出仅供合同审查参考，不构成法律意见；重大合同请由执业律师复核。</p>
+    <p>黑白红 · 智能合同工作台</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

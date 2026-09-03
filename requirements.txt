@@ -1,0 +1,2 @@
+# 最小依赖：仅需要 Python 3.10+ 与 NumPy
+numpy>=1.24
