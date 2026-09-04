@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我的笔记 · 简历工作台</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23dc2626'/%3E%3Crect x='24' y='26' width='52' height='9' rx='4' fill='white'/%3E%3Crect x='24' y='45' width='52' height='9' rx='4' fill='white'/%3E%3Crect x='24' y='64' width='34' height='9' rx='4' fill='white'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #f4f4f5;
+      --card: #ffffff;
+      --text: #111111;
+      --muted: #6b7280;
+      --border: #d9d9d9;
+      --border-strong: #111111;
+      --red: #dc2626;
+      --red-dark: #b91c1c;
+      --red-soft: #fdecec;
+      --radius: 14px;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .05), 0 6px 20px rgba(0, 0, 0, .06);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 22px;
+      background: rgba(255, 255, 255, .94);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border-strong);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand-logo { font-size: 26px; }
+    .brand-name { font-weight: 700; font-size: 16px; white-space: nowrap; }
+    .brand-sub { color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+    .tabs { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+    .tab {
+      border: 1px solid transparent;
+      background: transparent;
+      padding: 8px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .tab:hover { background: var(--red-soft); color: var(--red); }
+    .tab.active { background: var(--red); color: #fff; font-weight: 600; border-color: var(--red); }
+
+    main { max-width: 1180px; margin: 0 auto; padding: 22px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .page-head { margin-bottom: 16px; }
+    .page-head h1 { margin: 0 0 4px; font-size: 22px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .card h2 { margin: 0; font-size: 16px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .grow { flex: 1; min-width: 0; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+    .grid-resume { display: grid; grid-template-columns: 1fr 1.05fr; gap: 16px; align-items: start; }
+    .row { display: flex; gap: 12px; align-items: flex-end; }
+    .row.between { justify-content: space-between; align-items: center; }
+    .row.wrap { flex-wrap: wrap; }
+    .gap { gap: 12px; }
+
+    .field { display: block; margin-bottom: 12px; }
+    .field > span { display: block; margin-bottom: 5px; color: var(--muted); font-size: 13px; }
+    input, textarea, select {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      background: #fff;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px var(--red-soft);
+    }
+    textarea { resize: vertical; }
+
+    .btn {
+      border: 1px solid var(--border-strong);
+      background: #fff;
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 14px;
+      white-space: nowrap;
+      transition: .15s;
+    }
+    .btn:hover { background: #f5f5f5; }
+    .btn.primary { background: var(--red); border-color: var(--red); color: #fff; }
+    .btn.primary:hover { background: var(--red-dark); }
+    .btn.dark { background: #111; border-color: #111; color: #fff; }
+    .btn.dark:hover { background: #2a2a2a; }
+    .btn.danger { color: var(--red); border-color: var(--red); background: #fff; }
+    .btn.danger:hover { background: var(--red-soft); }
+    .btn.ghost { background: transparent; border-color: transparent; }
+    .btn.ghost:hover { background: var(--red-soft); color: var(--red); }
+    .btn.small { padding: 5px 10px; font-size: 13px; }
+    .btn.wide { width: 100%; margin-top: 4px; }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-group { display: flex; gap: 8px; }
+
+    .empty-hint { color: var(--muted); padding: 22px 6px; text-align: center; }
+
+    .record-card { border: 1px solid var(--border); border-radius: 11px; padding: 12px 14px; margin-bottom: 10px; }
+    .record-head { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 8px; font-size: 13px; color: var(--muted); }
+    .record-head b { color: var(--text); font-size: 13px; }
+    .record-field { display: flex; gap: 8px; margin: 4px 0; font-size: 13px; }
+    .record-field .k { color: var(--muted); flex: 0 0 110px; }
+    .record-field .v { white-space: pre-wrap; word-break: break-word; }
+
+    .note-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .note-item { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; position: relative; }
+    .note-item .note-text { white-space: pre-wrap; }
+    .note-item .note-time { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    .note-item .note-del { position: absolute; top: 8px; right: 10px; border: none; background: none; cursor: pointer; color: var(--muted); font-size: 16px; }
+    .note-item .note-del:hover { color: var(--red); }
+
+    .bullet-row { display: flex; align-items: flex-start; gap: 8px; border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; margin-bottom: 8px; background: #fafafa; }
+    .bullet-row .bullet-text { flex: 1; }
+    .bullet-row .mini-actions { display: flex; gap: 5px; flex: 0 0 auto; }
+    .mini { border: 1px solid var(--border); background: #fff; border-radius: 6px; cursor: pointer; padding: 3px 8px; font-size: 12px; color: var(--muted); }
+    .mini:hover { color: var(--red); border-color: var(--red); }
+    .bullet-lib { display: flex; flex-direction: column; gap: 6px; }
+
+    .sub-title { font-size: 13px; font-weight: 600; color: var(--red); margin: 16px 0 8px; }
+    .arr-item { border: 1px dashed var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; position: relative; background: #fafafa; }
+    .arr-item .rm { position: absolute; top: 8px; right: 10px; border: none; background: none; cursor: pointer; color: var(--muted); font-size: 16px; }
+    .arr-item .rm:hover { color: var(--red); }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .grid-2in { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .add-link { border: none; background: none; color: var(--red); cursor: pointer; font-size: 13px; padding: 2px 0; }
+    .insert-link { border: none; background: none; color: var(--red); cursor: pointer; font-size: 12px; }
+
+    .rich-editor { border: 1px solid var(--border); border-radius: 9px; overflow: hidden; background: #fff; }
+    .rich-editor:focus-within { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-soft); }
+    .rich-toolbar { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-bottom: 1px solid var(--border); background: #fafafa; }
+    .rich-btn { border: 1px solid var(--border); background: #fff; border-radius: 5px; cursor: pointer; font-weight: 700; width: 28px; height: 24px; padding: 0; font-size: 13px; line-height: 1; }
+    .rich-btn:hover { border-color: var(--red); color: var(--red); }
+    .rich-hint { color: var(--muted); font-size: 11px; }
+    .rich-area { min-height: 76px; padding: 8px 10px; outline: none; white-space: pre-wrap; word-break: break-word; }
+    .rich-area:empty::before { content: attr(data-placeholder); color: #aaa; }
+
+    .preview-wrap { position: sticky; top: 76px; }
+    .preview-label { margin-bottom: 6px; }
+    .preview-paper { background: #fff; border: 1px solid var(--border-strong); border-radius: 10px; box-shadow: var(--shadow); padding: 22px; overflow: auto; max-height: 82vh; }
+
+    .resume-doc { font-size: 13px; color: #111; line-height: 1.55; }
+    .resume-doc .r-name { font-size: 24px; font-weight: 700; margin: 0; }
+    .resume-doc .r-target { font-size: 14px; color: #444; margin: 4px 0 0; }
+    .resume-doc .r-contact { color: #555; font-size: 12px; }
+    .resume-doc .r-sec { margin-top: 14px; }
+    .resume-doc .r-h2 { font-size: 14px; font-weight: 700; margin: 0 0 6px; padding-bottom: 4px; border-bottom: 1.5px solid #111; }
+    .resume-doc .r-item { margin-bottom: 9px; }
+    .resume-doc .r-item-head { display: flex; justify-content: space-between; gap: 8px; }
+    .resume-doc .r-item-title { font-weight: 700; }
+    .resume-doc .r-item-time { color: #666; white-space: nowrap; }
+    .resume-doc .r-item-sub { color: #555; }
+    .resume-doc ul { margin: 4px 0 0; padding-left: 18px; }
+    .resume-doc li { margin: 2px 0; }
+    .resume-doc .r-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .resume-doc .r-chip { border: 1px solid #111; border-radius: 20px; padding: 1px 10px; font-size: 12px; }
+
+    .tpl-modern .r-head { background: var(--red); color: #fff; padding: 18px; border-radius: 8px; }
+    .tpl-modern .r-head .r-name, .tpl-modern .r-head .r-target, .tpl-modern .r-head .r-contact { color: #fff; }
+    .tpl-modern .r-h2 { color: var(--red); border-bottom: 2px solid var(--red); }
+    .tpl-modern .r-chip { border-color: var(--red); color: var(--red); }
+
+    .tpl-classic { font-family: "Georgia", "SimSun", serif; }
+    .tpl-classic .r-head { text-align: center; border-bottom: 2px double #111; padding-bottom: 12px; }
+    .tpl-classic .r-h2 { text-align: center; border: none; letter-spacing: 2px; }
+
+    .tpl-business .r-head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #111; padding-bottom: 12px; }
+    .tpl-business .r-name { color: #111; }
+    .tpl-business .r-contact { text-align: right; }
+    .tpl-business .r-h2 { background: #111; color: #fff; padding: 3px 8px; border: none; }
+    .tpl-business .r-chip { border-color: #111; color: #111; }
+
+    .tpl-academic .r-head { text-align: center; }
+    .tpl-academic .r-h2 { text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #111; }
+
+    .tailor-summary { background: var(--red-soft); border: 1px solid #f2b8b8; color: var(--red-dark); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; white-space: pre-wrap; }
+
+    .seg { display: flex; gap: 6px; }
+    .mode-btn { flex: 1; padding: 8px 6px; font-size: 13px; }
+    .mode-btn.active { background: var(--red); border-color: var(--red); color: #fff; font-weight: 600; }
+    .iv-item { border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; background: #fafafa; }
+    .iv-q { font-weight: 700; margin-bottom: 6px; }
+    .iv-a-label { color: var(--red); font-weight: 600; font-size: 12px; margin: 8px 0 2px; }
+    .iv-a { white-space: pre-wrap; }
+
+    .modal-mask { display: none; position: fixed; inset: 0; background: rgba(17, 17, 17, .45); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+    .modal-mask.open { display: flex; }
+    .modal { background: #fff; border-radius: 14px; width: 100%; max-width: 560px; max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0, 0, 0, .22); border: 1px solid var(--border-strong); }
+    .modal.small { max-width: 440px; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+    .modal-head h2 { margin: 0; font-size: 16px; }
+    .modal-body { padding: 16px 18px; overflow-y: auto; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 18px; border-top: 1px solid var(--border); }
+    .settings-block { margin-bottom: 18px; }
+    .settings-block h3 { margin: 0 0 4px; font-size: 15px; }
+
+    .pick-item { display: flex; gap: 8px; align-items: flex-start; padding: 8px; border-bottom: 1px solid var(--border); }
+    .pick-item input { width: auto; margin-top: 4px; }
+    .pick-item.checked { background: var(--red-soft); }
+
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #111; color: #fff; padding: 10px 18px; border-radius: 20px; opacity: 0; pointer-events: none; transition: .25s; z-index: 200; max-width: 80vw; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: var(--red-dark); }
+    #file-banner { display: none; background: var(--red); color: #fff; padding: 10px 18px; text-align: center; font-size: 13px; }
+    #file-banner.show { display: block; }
+
+    #print-slot { display: none; }
+    @media print {
+      body > *:not(#print-slot) { display: none !important; }
+      #print-slot { display: block !important; }
+      #print-slot .resume-doc { font-size: 12px; }
+    }
+
+    @media (max-width: 900px) {
+      .topbar { flex-wrap: wrap; }
+      .brand-sub { display: none; }
+      .tabs { order: 3; width: 100%; justify-content: space-between; }
+      .grid-2, .grid-resume { grid-template-columns: 1fr; }
+      .preview-wrap { position: static; }
+      .grid-3, .grid-2in { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="file-banner">⚠️ 你当前是直接打开 HTML 文件，飞书同步和 AI 生成不可用。请双击文件夹里的「启动.bat」来完整使用。</div>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-logo">📓</span>
+      <div class="brand-text">
+        <div class="brand-name">我的笔记 · 简历工作台</div>
+        <div class="brand-sub">每日同步飞书更新 · 经历提炼 · 简历定制</div>
+      </div>
+    </div>
+    <nav class="tabs" id="nav-tabs">
+      <button class="tab active" data-tab="home">🏠 首页</button>
+      <button class="tab" data-tab="experience">✨ 经历提炼</button>
+      <button class="tab" data-tab="resume">📄 简历模板</button>
+      <button class="tab" data-tab="tailor">🎯 岗位定制</button>
+      <button class="tab" data-tab="interview">💼 面试</button>
+    </nav>
+    <button class="btn ghost" id="settings-open">⚙️ 设置</button>
+    <button class="btn ghost" id="quit-app" title="退出软件">⏻ 退出</button>
+  </header>
+
+  <main>
+    <section class="panel active" id="panel-home">
+      <div class="page-head">
+        <h1 id="home-date"></h1>
+        <p class="muted">这里会每天自动同步你飞书表格里「昨天更新」的内容。</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>昨日飞书更新</h2>
+            <div class="muted" id="feishu-status">正在检查配置…</div>
+          </div>
+          <button class="btn primary" id="feishu-sync" disabled>🔄 立即同步</button>
+        </div>
+        <div id="feishu-content"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div><h2>随手笔记</h2></div></div>
+        <textarea id="note-input" rows="3" placeholder="写下此刻的想法、待办或灵感…"></textarea>
+        <div class="row between" style="margin-top:10px">
+          <button class="btn primary" id="note-save">保存笔记</button>
+          <span class="muted small" id="note-count"></span>
+        </div>
+        <div id="note-list" class="note-list"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-experience">
+      <div class="page-head">
+        <h1>经历 → 简历用语</h1>
+        <p class="muted">用一句口语化的大学习历，生成书面、专业、可量化的简历要点。</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2>输入经历</h2>
+          <label class="field">
+            <span>大学经历（一句话）</span>
+            <textarea id="exp-sentence" rows="3" placeholder="例如：我在学生会外联部拉过赞助，还办过校园歌手大赛"></textarea>
+          </label>
+          <div class="row">
+            <label class="field grow">
+              <span>目标岗位方向（可选）</span>
+              <input id="exp-context" type="text" placeholder="如：产品经理 / 运营 / 管培生" />
+            </label>
+            <label class="field">
+              <span>要点数量</span>
+              <select id="exp-count">
+                <option value="3">3 条</option>
+                <option value="4" selected>4 条</option>
+                <option value="5">5 条</option>
+                <option value="6">6 条</option>
+              </select>
+            </label>
+          </div>
+          <label class="field">
+            <span>风格倾向</span>
+            <select id="exp-style">
+              <option value="通用">通用</option>
+              <option value="量化成果">突出量化成果</option>
+              <option value="学术科研">学术科研</option>
+              <option value="实习项目">实习 / 项目</option>
+            </select>
+          </label>
+          <button class="btn primary wide" id="gen-bullets">✨ 生成简历用语</button>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2>生成结果</h2></div>
+            <button class="btn ghost small" id="copy-all-bullets">复制全部</button>
+          </div>
+          <div id="bullets-result" class="empty-hint">填写左侧经历并点击「生成」，结果会显示在这里。</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div><h2>我的简历用语库</h2><div class="muted small">可在「简历模板」中一键插入</div></div>
+        </div>
+        <div id="bullet-lib" class="bullet-lib empty-hint">还没有保存的简历用语。</div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-resume">
+      <div class="page-head">
+        <h1>简历模板</h1>
+        <p class="muted">同一份内容，套用不同模板，并可导出为 PDF。</p>
+      </div>
+
+      <div class="toolbar card">
+        <div class="row wrap gap">
+          <label class="field grow">
+            <span>选择简历</span>
+            <select id="resume-select"></select>
+          </label>
+          <label class="field">
+            <span>模板风格</span>
+            <select id="template-select">
+              <option value="simple">简约</option>
+              <option value="modern">现代</option>
+              <option value="classic">经典</option>
+              <option value="business">商务</option>
+              <option value="academic">学术</option>
+            </select>
+          </label>
+          <div class="btn-group">
+            <button class="btn" data-action="resume-new">＋ 新建</button>
+            <button class="btn" data-action="resume-copy">复制</button>
+            <button class="btn danger" data-action="resume-delete">删除</button>
+          </div>
+          <div class="btn-group">
+            <button class="btn primary" data-action="resume-save">💾 保存</button>
+            <button class="btn dark" data-action="resume-export">🖨 导出 PDF</button>
+            <button class="btn dark" data-action="resume-word">📄 导出 Word</button>
+          </div>
+          <span class="muted small" id="autosave-status" style="align-self:center;margin-left:auto"></span>
+        </div>
+      </div>
+
+      <div class="grid-resume">
+        <div class="card" id="resume-form"></div>
+        <div class="preview-wrap">
+          <div class="preview-label muted small">实时预览</div>
+          <div class="preview-paper"><div id="resume-preview"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-tailor">
+      <div class="page-head">
+        <h1>岗位定制</h1>
+        <p class="muted">粘贴岗位要求，自动改写简历、突出匹配点，生成定制版。</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2>定制设置</h2>
+          <p class="muted small">会自动综合你写过的所有简历 + 下方「经历大汇总」+ 岗位要求，生成一份完整简历。</p>
+          <label class="field">
+            <span>经历大汇总</span>
+            <textarea id="tailor-pool" rows="6" placeholder="把你在大学和实习中做过的所有事、成果、技能都汇总写在这里（可随时补充）"></textarea>
+          </label>
+          <label class="field">
+            <span>岗位名称（可选）</span>
+            <input id="tailor-title" type="text" placeholder="如：产品经理 / 新媒体运营" />
+          </label>
+          <label class="field">
+            <span>岗位要求（JD）</span>
+            <textarea id="tailor-jd" rows="9" placeholder="粘贴招聘信息中的岗位职责与任职要求…"></textarea>
+          </label>
+          <button class="btn primary wide" id="tailor-gen">🎯 生成定制简历</button>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2>定制结果</h2></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn dark small" id="tailor-export" disabled>🖨 导出 PDF</button>
+              <button class="btn dark small" id="tailor-word" disabled>📄 导出 Word</button>
+            </div>
+          </div>
+          <div id="tailor-summary" class="tailor-summary"></div>
+          <div id="tailor-result" class="empty-hint">粘贴岗位要求并生成后，定制简历会显示在这里。</div>
+          <div class="row" style="margin-top:12px">
+            <button class="btn primary" id="tailor-save" disabled>💾 保存为新简历</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-interview">
+      <div class="page-head">
+        <h1>面试助手</h1>
+        <p class="muted">根据你的经历生成专业面试回答，或设想面试官问题、回答指定问题。</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2>面试准备</h2>
+          <div class="seg" style="margin:10px 0 14px">
+            <button class="btn mode-btn active" data-mode="answers">生成面试回答</button>
+            <button class="btn mode-btn" data-mode="questions">设想面试官问题</button>
+            <button class="btn mode-btn" data-mode="answer">回答指定问题</button>
+          </div>
+          <label class="field">
+            <span>我的经历</span>
+            <textarea id="iv-experience" rows="5" placeholder="例如：我曾带队完成一个校园创业项目，从 0 到 1 上线了一个小程序，获得校级一等奖"></textarea>
+          </label>
+          <label class="field">
+            <span>目标行业 / 岗位（可选）</span>
+            <input id="iv-context" type="text" placeholder="如：互联网产品 / 快消管培 / 咨询" />
+          </label>
+          <label class="field" id="iv-question-wrap" style="display:none">
+            <span>面试官问题</span>
+            <textarea id="iv-question" rows="3" placeholder="例如：你遇到过最大的困难是什么？"></textarea>
+          </label>
+          <label class="field" id="iv-count-wrap">
+            <span>生成数量</span>
+            <select id="iv-count">
+              <option value="3">3 道</option>
+              <option value="4" selected>4 道</option>
+              <option value="5">5 道</option>
+              <option value="6">6 道</option>
+            </select>
+          </label>
+          <button class="btn primary wide" id="iv-gen">💼 生成面试回答</button>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2>结果</h2></div>
+            <button class="btn ghost small" id="iv-copy-all">复制全部</button>
+          </div>
+          <div id="iv-result" class="empty-hint">填写经历并点击「生成」，结果会显示在这里。</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-mask" id="settings-modal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>⚙️ 设置</h2>
+        <button class="btn ghost small" id="settings-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-block">
+          <h3>飞书多维表格</h3>
+          <p class="muted small">用于每天同步「昨日更新」内容。App ID / Secret 请到飞书开放平台创建自建应用获取，并把表格分享给该应用。</p>
+          <label class="field"><span>飞书 App ID</span><input id="cfg-app-id" type="text" placeholder="cli_xxxxxxxx" /></label>
+          <label class="field"><span>飞书 App Secret</span><input id="cfg-app-secret" type="password" placeholder="未配置" /></label>
+          <label class="field"><span>多维表格 app_token</span><input id="cfg-app-token" type="text" /></label>
+          <label class="field"><span>数据表 table_id</span><input id="cfg-table-id" type="text" /></label>
+        </div>
+        <div class="settings-block">
+          <h3>AI 接口（OpenAI 兼容）</h3>
+          <p class="muted small">用于生成简历用语与定制简历，支持 OpenAI、DeepSeek、Kimi、通义等。</p>
+          <label class="field"><span>服务商快捷选择（可选）</span>
+            <select id="cfg-ai-preset">
+              <option value="">自定义</option>
+              <option value="openai">OpenAI</option>
+              <option value="deepseek">DeepSeek</option>
+              <option value="dashscope">通义千问（阿里云）</option>
+              <option value="moonshot">Moonshot Kimi</option>
+              <option value="zhipu">智谱 GLM</option>
+            </select>
+          </label>
+          <label class="field"><span>接口地址 Base URL</span><input id="cfg-ai-base" type="text" placeholder="https://api.openai.com/v1" /></label>
+          <label class="field"><span>API Key</span><input id="cfg-ai-key" type="password" placeholder="未配置" /></label>
+          <label class="field"><span>模型名称</span><input id="cfg-ai-model" type="text" placeholder="gpt-4o-mini" /></label>
+          <div class="row" style="align-items:center">
+            <button class="btn dark" type="button" id="cfg-ai-test">🔌 测试连接</button>
+            <span class="muted small" id="cfg-ai-test-result" style="word-break:break-all"></span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn ghost" id="settings-cancel">取消</button>
+        <button class="btn primary" id="settings-save">保存设置</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="pick-modal">
+    <div class="modal small">
+      <div class="modal-head">
+        <h2>从简历用语库插入</h2>
+        <button class="btn ghost small" id="pick-cancel">✕</button>
+      </div>
+      <div class="modal-body" id="pick-list"></div>
+      <div class="modal-foot">
+        <button class="btn ghost" id="pick-cancel2">取消</button>
+        <button class="btn primary" id="pick-insert">插入选中</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="print-slot"></div>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const DEFAULT_FEISHU = {
+      app_token: "ISNobVuXAagJBFssvszcYeqQnfb",
+      table_id: "tblh7J5ONBOMBEK8",
+      view_id: "vew0zSgYvA",
+    };
+
+    const AI_PRESETS = {
+      openai: { base: "https://api.openai.com/v1", model: "gpt-4o-mini" },
+      deepseek: { base: "https://api.deepseek.com/v1", model: "deepseek-v4-flash" },
+      dashscope: { base: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-plus" },
+      moonshot: { base: "https://api.moonshot.cn/v1", model: "kimi-k3" },
+      zhipu: { base: "https://open.bigmodel.cn/api/paas/v4", model: "glm-4-flash" },
+    };
+
+    let config = { ...DEFAULT_FEISHU };
+    let notes = [];
+    let bulletLib = [];
+    let resumes = [];
+    let currentResumeId = null;
+    let currentTemplate = "simple";
+    let pickTarget = null;
+    let pickChecked = new Set();
+    let tailorResult = null;
+    let interviewMode = "answers";
+    let lastInterview = { mode: "answers", answer: null, items: [] };
+    let autosaveTimer = null;
+    let noteDraftTimer = null;
+
+    function $(sel) { return document.querySelector(sel); }
+    function $all(sel) { return Array.from(document.querySelectorAll(sel)); }
+
+    function esc(s) {
+      return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      }[c]));
+    }
+
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+
+    function deepCopy(x) { return JSON.parse(JSON.stringify(x)); }
+
+    function resumeToPlain(r) {
+      return {
+        name: r.name || "", target: r.target || "", phone: r.phone || "",
+        email: r.email || "", location: r.location || "", summary: r.summary || "",
+        education: r.education || [], experience: r.experience || [],
+        projects: r.projects || [], skills: r.skills || [], awards: r.awards || [],
+      };
+    }
+
+    function loadJSON(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    function saveJSON(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function toast(msg, isError) {
+      const el = $("#toast");
+      el.textContent = msg;
+      el.className = "toast show" + (isError ? " error" : "");
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.className = "toast"; }, 2600);
+    }
+
+    async function api(path, options) {
+      const res = await fetch(path, options);
+      let data;
+      try { data = await res.json(); } catch (e) { data = {}; }
+      if (!res.ok) {
+        throw new Error(data.error || `请求失败（${res.status}）`);
+      }
+      return data;
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        toast("已复制到剪贴板");
+      } catch (e) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        toast("已复制到剪贴板");
+      }
+    }
+
+    function setByPath(obj, path, value) {
+      const parts = path.split(".");
+      let cur = obj;
+      for (let i = 0; i < parts.length - 1; i++) cur = cur[parts[i]];
+      cur[parts[parts.length - 1]] = value;
+    }
+
+    function getByPath(obj, path) {
+      return path.split(".").reduce((c, k) => (c == null ? undefined : c[k]), obj);
+    }
+
+    function formatDateCN(iso) {
+      if (!iso) return "";
+      const [y, m, d] = iso.split("-").map(Number);
+      const week = ["日", "一", "二", "三", "四", "五", "六"][new Date(y, m - 1, d).getDay()];
+      return `${y} 年 ${m} 月 ${d} 日 · 星期${week}`;
+    }
+
+    function formatTs(ms) {
+      if (!ms) return "";
+      const d = new Date(Number(ms));
+      const p = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    }
+
+    function seedNotes() {
+      return [{
+        id: uid(),
+        text: "欢迎使用「我的笔记 · 简历工作台」！\n\n· 首页每天同步你飞书表格昨天更新的内容\n· 「经历提炼」把一句大学习历变成专业简历用语\n· 「简历模板」用不同模板排版简历\n· 「岗位定制」针对 JD 自动改写简历\n· 「面试」生成面试回答、设想面试官问题\n\n先点右上角「⚙️ 设置」配置飞书和 AI 接口吧。",
+        time: Date.now(),
+      }];
+    }
+
+    function seedResume() {
+      return [{
+        id: "sample",
+        name: "张三",
+        target: "产品经理",
+        phone: "138-0000-0000",
+        email: "zhangsan@example.com",
+        location: "北京",
+        summary: "具备扎实的计算机专业背景与三段实习经历，熟悉产品需求分析与项目管理，擅长数据分析与跨团队协作，目标成为优秀的产品经理。",
+        education: [{ school: "XX大学", degree: "本科", major: "计算机科学与技术", time: "2022.09 - 2026.06" }],
+        experience: [
+          { org: "某互联网公司", title: "产品实习生", time: "2025.06 - 2025.09", bullets: ["协助产品经理完成用户需求调研，输出 12 份竞品分析报告", "跟进版本迭代流程，推动 3 项功能按期上线"] },
+          { org: "某科技公司", title: "运营实习生", time: "2024.07 - 2024.09", bullets: ["负责校园推广活动策划与执行，覆盖 2000 余名学生"] },
+        ],
+        projects: [
+          { name: "校园二手交易平台", role: "负责人", time: "2024.09 - 2025.01", bullets: ["主导产品原型设计与需求文档撰写", "协调 5 人团队完成开发并上线，累计注册用户 1000+"] },
+        ],
+        skills: ["Axure", "Figma", "SQL", "数据分析", "项目管理"],
+        awards: ["校级优秀学生干部", "国家励志奖学金"],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      }];
+    }
+
+    function emptyResume() {
+      return {
+        id: uid(), name: "", target: "", phone: "", email: "", location: "", summary: "",
+        education: [{ school: "", degree: "", major: "", time: "" }],
+        experience: [{ org: "", title: "", time: "", bullets: [] }],
+        projects: [{ name: "", role: "", time: "", bullets: [] }],
+        skills: [], awards: [],
+        createdAt: Date.now(), updatedAt: Date.now(),
+      };
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      if (location.protocol === "file:") {
+        const fb = document.getElementById("file-banner");
+        if (fb) fb.classList.add("show");
+      }
+      notes = loadJSON("notes", seedNotes());
+      bulletLib = loadJSON("bullet_lib", []);
+      resumes = loadJSON("resumes", seedResume());
+      currentResumeId = loadJSON("current_resume_id", resumes[0]?.id || null);
+      if (!resumes.find((r) => r.id === currentResumeId)) currentResumeId = resumes[0]?.id || null;
+      currentTemplate = loadJSON("current_template", "simple");
+
+      renderHomeDate();
+      renderNotes();
+      const noteDraft = localStorage.getItem("note_draft");
+      if (noteDraft) $("#note-input").value = noteDraft;
+      const pool = localStorage.getItem("experience_pool");
+      if (pool) $("#tailor-pool").value = pool;
+      renderBulletLib();
+      renderResumeSelect();
+      renderTemplateSelect();
+      loadResumeById(currentResumeId);
+
+      await loadConfig();
+      maybeAutoSync();
+
+      bindEvents();
+    });
+
+    function bindEvents() {
+      $all(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => switchTab(tab.dataset.tab));
+      });
+
+      $("#settings-open").addEventListener("click", openSettings);
+      $("#quit-app").addEventListener("click", quitApp);
+      $("#settings-close").addEventListener("click", closeSettings);
+      $("#settings-cancel").addEventListener("click", closeSettings);
+      $("#settings-save").addEventListener("click", saveSettings);
+      $("#cfg-ai-preset").addEventListener("change", (e) => {
+        const p = AI_PRESETS[e.target.value];
+        if (p) {
+          $("#cfg-ai-base").value = p.base;
+          $("#cfg-ai-model").value = p.model;
+        }
+      });
+      $("#cfg-ai-test").addEventListener("click", testAI);
+
+      $("#feishu-sync").addEventListener("click", syncFeishu);
+      $("#note-save").addEventListener("click", saveNote);
+      $("#note-input").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) saveNote();
+      });
+      $("#note-input").addEventListener("input", scheduleNoteDraftAutosave);
+
+      $("#gen-bullets").addEventListener("click", generateBullets);
+      $("#copy-all-bullets").addEventListener("click", copyAllBullets);
+
+      $("#resume-select").addEventListener("change", (e) => loadResumeById(e.target.value));
+      $("#template-select").addEventListener("change", (e) => {
+        currentTemplate = e.target.value;
+        saveJSON("current_template", currentTemplate);
+        renderPreview();
+      });
+      $("#resume-form").addEventListener("input", onFormInput);
+
+      $("#tailor-gen").addEventListener("click", tailorResume);
+      $("#tailor-export").addEventListener("click", exportTailor);
+      $("#tailor-word").addEventListener("click", exportWordTailor);
+      $("#tailor-save").addEventListener("click", saveTailor);
+      $("#tailor-pool").addEventListener("input", () => {
+        localStorage.setItem("experience_pool", $("#tailor-pool").value);
+      });
+
+      $all(".mode-btn").forEach((b) => b.addEventListener("click", () => setInterviewMode(b.dataset.mode)));
+      $("#iv-gen").addEventListener("click", generateInterview);
+      $("#iv-copy-all").addEventListener("click", copyAllInterview);
+
+      $("#pick-cancel").addEventListener("click", closePick);
+      $("#pick-cancel2").addEventListener("click", closePick);
+      $("#pick-insert").addEventListener("click", insertPicked);
+
+      document.addEventListener("click", onActionClick);
+
+      $all(".modal-mask").forEach((m) => {
+        m.addEventListener("click", (e) => { if (e.target === m) m.classList.remove("open"); });
+      });
+    }
+
+    function onActionClick(e) {
+      const el = e.target.closest("[data-action]");
+      if (!el) return;
+      const action = el.dataset.action;
+      const id = el.dataset.id;
+
+      if (action === "note-delete") {
+        notes = notes.filter((n) => n.id !== id);
+        saveJSON("notes", notes);
+        renderNotes();
+      } else if (action === "bullet-copy") {
+        copyText(el.dataset.text || "");
+      } else if (action === "bullet-add") {
+        const text = el.dataset.text || "";
+        if (bulletLib.some((b) => b.text === text)) { toast("这条已在用语库中"); return; }
+        bulletLib.unshift({ id: uid(), text, time: Date.now() });
+        saveJSON("bullet_lib", bulletLib);
+        renderBulletLib();
+        toast("已加入简历用语库");
+      } else if (action === "bullet-del") {
+        bulletLib = bulletLib.filter((b) => b.id !== id);
+        saveJSON("bullet_lib", bulletLib);
+        renderBulletLib();
+      } else if (action === "resume-new") {
+        const r = emptyResume();
+        resumes.push(r);
+        persistResumes();
+        currentResumeId = r.id;
+        renderResumeSelect();
+        loadResumeById(r.id);
+        toast("已新建简历");
+      } else if (action === "resume-copy") {
+        const src = resumes.find((r) => r.id === currentResumeId);
+        if (!src) return;
+        const r = deepCopy(src);
+        r.id = uid();
+        r.createdAt = r.updatedAt = Date.now();
+        resumes.push(r);
+        persistResumes();
+        currentResumeId = r.id;
+        renderResumeSelect();
+        loadResumeById(r.id);
+        toast("已复制为一份新简历");
+      } else if (action === "resume-delete") {
+        if (resumes.length <= 1) { toast("至少保留一份简历"); return; }
+        if (!confirm("确定删除当前这份简历吗？此操作不可恢复。")) return;
+        resumes = resumes.filter((r) => r.id !== currentResumeId);
+        persistResumes();
+        currentResumeId = resumes[0].id;
+        renderResumeSelect();
+        loadResumeById(currentResumeId);
+        toast("已删除");
+      } else if (action === "resume-save") {
+        saveCurrentResume(true);
+      } else if (action === "resume-export") {
+        exportResume();
+      } else if (action === "resume-word") {
+        exportWordResume();
+      } else if (action.startsWith("resume-add-")) {
+        addArrayItem(action.slice("resume-add-".length));
+      } else if (action.startsWith("resume-rm-")) {
+        removeArrayItem(action.slice("resume-rm-".length), Number(el.dataset.idx));
+      } else if (action === "resume-insert") {
+        openPick(Number(el.dataset.idx));
+      } else if (action === "polish") {
+        polishField(el.dataset.path, el.dataset.kind, el);
+      } else if (action === "pick-toggle") {
+        const pid = el.dataset.id;
+        if (pickChecked.has(pid)) pickChecked.delete(pid);
+        else pickChecked.add(pid);
+        el.closest(".pick-item").classList.toggle("checked", pickChecked.has(pid));
+      } else if (action === "iv-copy") {
+        const it = lastInterview.items[Number(el.dataset.idx)];
+        if (it) copyText(ivItemText(it));
+      } else if (action === "iv-copy-answer") {
+        if (lastInterview.answer) copyText(lastInterview.answer);
+      }
+    }
+
+    function onFormInput(e) {
+      const el = e.target;
+      if (!el.dataset || !el.dataset.path) return;
+      const resume = currentResume();
+      if (!resume) return;
+      let val = el.value;
+      if (el.dataset.kind === "list") {
+        val = val.split("\n").map((s) => s.trim()).filter(Boolean);
+      }
+      setByPath(resume, el.dataset.path, val);
+      resume.updatedAt = Date.now();
+      renderPreview();
+      scheduleAutosave();
+    }
+
+    function switchTab(tab) {
+      $all(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === tab));
+      $all(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + tab));
+      if (tab === "home") maybeAutoSync();
+    }
+
+    function renderHomeDate() {
+      const now = new Date();
+      const week = ["日", "一", "二", "三", "四", "五", "六"][now.getDay()];
+      $("#home-date").textContent = `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日 · 星期${week}`;
+    }
+
+    function renderNotes() {
+      const list = $("#note-list");
+      if (!notes.length) {
+        list.innerHTML = '<div class="empty-hint">还没有笔记，写一条吧。</div>';
+        $("#note-count").textContent = "";
+        return;
+      }
+      const sorted = [...notes].sort((a, b) => b.time - a.time);
+      list.innerHTML = sorted.map((n) => `
+        <div class="note-item">
+          <button class="note-del" data-action="note-delete" data-id="${n.id}" title="删除">✕</button>
+          <div class="note-text">${esc(n.text)}</div>
+          <div class="note-time">${formatTs(n.time)}</div>
+        </div>`).join("");
+      $("#note-count").textContent = `共 ${notes.length} 条笔记`;
+    }
+
+    function saveNote() {
+      const text = $("#note-input").value.trim();
+      if (!text) { toast("先写点内容再保存吧"); return; }
+      notes.unshift({ id: uid(), text, time: Date.now() });
+      saveJSON("notes", notes);
+      $("#note-input").value = "";
+      localStorage.removeItem("note_draft");
+      renderNotes();
+      toast("笔记已保存");
+    }
+
+    function renderFeishuStatus(msg, ready) {
+      $("#feishu-status").textContent = msg;
+      $("#feishu-sync").disabled = !ready;
+    }
+
+    function renderFeishuRecords(data) {
+      const box = $("#feishu-content");
+      if (!data.records.length) {
+        box.innerHTML = `<div class="empty-hint">${formatDateCN(data.date)} 没有更新的内容。</div>`;
+        return;
+      }
+      box.innerHTML = data.records.map((r) => {
+        const fields = r.fields
+          .filter((f) => f.value)
+          .map((f) => `<div class="record-field"><span class="k">${esc(f.name)}</span><span class="v">${esc(f.value)}</span></div>`)
+          .join("");
+        return `
+          <div class="record-card">
+            <div class="record-head">
+              <b>${esc(r.last_modified_by || "未知")} 更新</b>
+              <span>${formatTs(r.last_modified_time)}</span>
+            </div>
+            ${fields || '<div class="muted small">（无可显示字段）</div>'}
+          </div>`;
+      }).join("");
+    }
+
+    async function syncFeishu() {
+      const btn = $("#feishu-sync");
+      btn.disabled = true;
+      renderFeishuStatus("正在同步…", false);
+      try {
+        const data = await api("/api/feishu/sync");
+        renderFeishuRecords(data);
+        renderFeishuStatus(
+          `${formatDateCN(data.date)} · 共 ${data.count} 条更新 · 最近同步 ${new Date().toLocaleTimeString()}`,
+          true
+        );
+      } catch (e) {
+        renderFeishuStatus(e.message, true);
+        $("#feishu-content").innerHTML = `<div class="empty-hint">${esc(e.message)}<br><br>可点击右上角「⚙️ 设置」检查飞书配置。</div>`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function maybeAutoSync() {
+      if (config.app_id && config.app_secret_set) {
+        syncFeishu();
+      } else {
+        renderFeishuStatus("尚未配置飞书，点击右上角「⚙️ 设置」开始。", false);
+        $("#feishu-content").innerHTML =
+          '<div class="empty-hint">配置完成后，这里每天会自动显示你飞书表格「昨天更新」的内容。</div>';
+      }
+    }
+
+    async function loadConfig() {
+      try {
+        const data = await api("/api/config");
+        config = {
+          app_id: data.app_id || "",
+          app_token: data.app_token || DEFAULT_FEISHU.app_token,
+          table_id: data.table_id || DEFAULT_FEISHU.table_id,
+          view_id: data.view_id || DEFAULT_FEISHU.view_id,
+          app_secret_set: data.app_secret_set,
+          ai_base_url: data.ai_base_url || "",
+          ai_model: data.ai_model || "",
+          ai_api_key_set: data.ai_api_key_set,
+        };
+      } catch (e) {
+        // 保持默认
+      }
+    }
+
+    async function openSettings() {
+      await loadConfig();
+      $("#cfg-app-id").value = config.app_id || "";
+      $("#cfg-app-secret").value = "";
+      $("#cfg-app-secret").placeholder = config.app_secret_set ? "已配置（留空则不修改）" : "未配置";
+      $("#cfg-app-token").value = config.app_token || "";
+      $("#cfg-table-id").value = config.table_id || "";
+      $("#cfg-ai-base").value = config.ai_base_url || "";
+      $("#cfg-ai-key").value = "";
+      $("#cfg-ai-key").placeholder = config.ai_api_key_set ? "已配置（留空则不修改）" : "未配置";
+      $("#cfg-ai-model").value = config.ai_model || "";
+      $("#cfg-ai-preset").value = "";
+      $("#cfg-ai-test-result").textContent = "";
+      $("#settings-modal").classList.add("open");
+    }
+
+    function closeSettings() {
+      $("#settings-modal").classList.remove("open");
+    }
+
+    async function saveSettings() {
+      const payload = {
+        app_id: $("#cfg-app-id").value.trim(),
+        app_secret: $("#cfg-app-secret").value.trim(),
+        app_token: $("#cfg-app-token").value.trim(),
+        table_id: $("#cfg-table-id").value.trim(),
+        view_id: config.view_id || "",
+        ai_base_url: $("#cfg-ai-base").value.trim(),
+        ai_api_key: $("#cfg-ai-key").value.trim(),
+        ai_model: $("#cfg-ai-model").value.trim(),
+      };
+      const btn = $("#settings-save");
+      btn.disabled = true;
+      try {
+        const data = await api("/api/config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        config = { ...DEFAULT_FEISHU, ...data.config };
+        closeSettings();
+        toast("设置已保存");
+        maybeAutoSync();
+      } catch (e) {
+        toast("保存失败：" + e.message, true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function testAI() {
+      const payload = {
+        app_id: $("#cfg-app-id").value.trim(),
+        app_secret: $("#cfg-app-secret").value.trim(),
+        app_token: $("#cfg-app-token").value.trim(),
+        table_id: $("#cfg-table-id").value.trim(),
+        view_id: config.view_id || "",
+        ai_base_url: $("#cfg-ai-base").value.trim(),
+        ai_api_key: $("#cfg-ai-key").value.trim(),
+        ai_model: $("#cfg-ai-model").value.trim(),
+      };
+      const btn = $("#cfg-ai-test");
+      const out = $("#cfg-ai-test-result");
+      btn.disabled = true;
+      out.textContent = "正在测试…";
+      out.style.color = "";
+      try {
+        // 先保存当前填写内容，再测试
+        const saved = await api("/api/config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        config = { ...DEFAULT_FEISHU, ...saved.config };
+        const r = await api("/api/ai/test", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}",
+        });
+        if (r.ok) {
+          out.textContent = `✅ 连接成功，模型回复：「${r.reply}」`;
+          out.style.color = "#16a34a";
+        } else {
+          out.textContent = "❌ " + (r.error || "未知错误");
+          out.style.color = "#dc2626";
+        }
+      } catch (e) {
+        out.textContent = "❌ " + e.message;
+        out.style.color = "#dc2626";
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function generateBullets() {
+      const sentence = $("#exp-sentence").value.trim();
+      if (!sentence) { toast("请先填写你的大学经历"); return; }
+      const btn = $("#gen-bullets");
+      btn.disabled = true;
+      btn.textContent = "生成中…";
+      $("#bullets-result").innerHTML = '<div class="empty-hint">AI 正在整理你的经历，请稍候…</div>';
+      try {
+        const data = await api("/api/ai/bullets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sentence,
+            context: $("#exp-context").value.trim(),
+            count: Number($("#exp-count").value),
+            style: $("#exp-style").value,
+          }),
+        });
+        renderBulletResult(data.bullets);
+      } catch (e) {
+        $("#bullets-result").innerHTML = `<div class="empty-hint">${esc(e.message)}<br><br>如未配置 AI，请点击右上角「⚙️ 设置」。</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "✨ 生成简历用语";
+      }
+    }
+
+    function renderBulletResult(bullets) {
+      const box = $("#bullets-result");
+      box.innerHTML = bullets.map((b, i) => `
+        <div class="bullet-row">
+          <div class="bullet-text">${i + 1}. ${esc(b)}</div>
+          <div class="mini-actions">
+            <button class="mini" data-action="bullet-copy" data-text="${esc(b)}">复制</button>
+            <button class="mini" data-action="bullet-add" data-text="${esc(b)}">＋ 用语库</button>
+          </div>
+        </div>`).join("");
+    }
+
+    function renderBulletLib() {
+      const box = $("#bullet-lib");
+      if (!bulletLib.length) {
+        box.className = "bullet-lib empty-hint";
+        box.textContent = "还没有保存的简历用语。";
+        return;
+      }
+      box.className = "bullet-lib";
+      box.innerHTML = bulletLib.map((b) => `
+        <div class="bullet-row">
+          <div class="bullet-text">${esc(b.text)}</div>
+          <div class="mini-actions">
+            <button class="mini" data-action="bullet-copy" data-text="${esc(b.text)}">复制</button>
+            <button class="mini" data-action="bullet-del" data-id="${b.id}">删除</button>
+          </div>
+        </div>`).join("");
+    }
+
+    async function copyAllBullets() {
+      const texts = $all("#bullets-result .bullet-text").map((el) => el.textContent.trim());
+      if (!texts.length) { toast("还没有生成结果"); return; }
+      await copyText(texts.join("\n"));
+    }
+
+    function currentResume() {
+      return resumes.find((r) => r.id === currentResumeId) || null;
+    }
+
+    function persistResumes() {
+      saveJSON("resumes", resumes);
+      saveJSON("current_resume_id", currentResumeId);
+    }
+
+    function renderResumeSelect() {
+      const opts = resumes.map((r, i) =>
+        `<option value="${r.id}" ${r.id === currentResumeId ? "selected" : ""}>${esc(r.name || "未命名简历")}（${i + 1}）</option>`
+      ).join("");
+      $("#resume-select").innerHTML = opts || '<option value="">无</option>';
+    }
+
+    function renderTemplateSelect() {
+      $("#template-select").value = currentTemplate;
+    }
+
+    function loadResumeById(id) {
+      const r = resumes.find((x) => x.id === id);
+      if (!r) return;
+      currentResumeId = r.id;
+      $("#resume-select").value = r.id;
+      renderResumeForm();
+      renderPreview();
+    }
+
+    function renderResumeForm() {
+      const r = currentResume();
+      if (!r) { $("#resume-form").innerHTML = '<div class="empty-hint">请先新建一份简历。</div>'; return; }
+
+      const edu = (r.education || []).map((e, i) => `
+        <div class="arr-item">
+          <button class="rm" data-action="resume-rm-education" data-idx="${i}" title="删除">✕</button>
+          <div class="grid-2in">
+            <label class="field"><span>学校</span><input data-path="education.${i}.school" value="${esc(e.school)}" placeholder="XX大学"></label>
+            <label class="field"><span>专业</span><input data-path="education.${i}.major" value="${esc(e.major)}" placeholder="计算机科学与技术"></label>
+          </div>
+          <div class="grid-2in">
+            <label class="field"><span>学历</span><input data-path="education.${i}.degree" value="${esc(e.degree)}" placeholder="本科"></label>
+            <label class="field"><span>时间</span><input data-path="education.${i}.time" value="${esc(e.time)}" placeholder="2022.09 - 2026.06"></label>
+          </div>
+        </div>`).join("");
+
+      const exp = (r.experience || []).map((e, i) => `
+        <div class="arr-item">
+          <button class="rm" data-action="resume-rm-experience" data-idx="${i}" title="删除">✕</button>
+          <div class="grid-2in">
+            <label class="field"><span>机构 / 公司</span><input data-path="experience.${i}.org" value="${esc(e.org)}" placeholder="某公司"></label>
+            <label class="field"><span>职位</span><input data-path="experience.${i}.title" value="${esc(e.title)}" placeholder="产品实习生"></label>
+          </div>
+          <label class="field"><span>时间</span><input data-path="experience.${i}.time" value="${esc(e.time)}" placeholder="2025.06 - 2025.09"></label>
+          <label class="field">
+            <span>经历要点（一行一条）
+              <button class="insert-link" type="button" data-action="resume-insert" data-idx="${i}">＋ 从用语库插入</button>
+              <button class="insert-link" type="button" data-action="polish" data-path="experience.${i}.bullets" data-kind="bullets">✨ AI 润色</button>
+            </span>
+            <textarea data-path="experience.${i}.bullets" data-kind="list" rows="3" placeholder="负责……">${esc((e.bullets || []).join("\n"))}</textarea>
+          </label>
+        </div>`).join("");
+
+      const proj = (r.projects || []).map((p, i) => `
+        <div class="arr-item">
+          <button class="rm" data-action="resume-rm-projects" data-idx="${i}" title="删除">✕</button>
+          <div class="grid-2in">
+            <label class="field"><span>项目名称</span><input data-path="projects.${i}.name" value="${esc(p.name)}" placeholder="校园二手交易平台"></label>
+            <label class="field"><span>担任角色</span><input data-path="projects.${i}.role" value="${esc(p.role)}" placeholder="负责人"></label>
+          </div>
+          <label class="field"><span>时间</span><input data-path="projects.${i}.time" value="${esc(p.time)}" placeholder="2024.09 - 2025.01"></label>
+          <label class="field">
+            <span>项目要点（一行一条）
+              <button class="insert-link" type="button" data-action="polish" data-path="projects.${i}.bullets" data-kind="bullets">✨ AI 润色</button>
+            </span>
+            <textarea data-path="projects.${i}.bullets" data-kind="list" rows="3" placeholder="主导……">${esc((p.bullets || []).join("\n"))}</textarea>
+          </label>
+        </div>`).join("");
+
+      $("#resume-form").innerHTML = `
+        <h2>基础信息</h2>
+        <div class="grid-2in">
+          <label class="field"><span>姓名</span><input data-path="name" value="${esc(r.name)}"></label>
+          <label class="field"><span>求职意向</span><input data-path="target" value="${esc(r.target)}"></label>
+        </div>
+        <div class="grid-3">
+          <label class="field"><span>电话</span><input data-path="phone" value="${esc(r.phone)}"></label>
+          <label class="field"><span>邮箱</span><input data-path="email" value="${esc(r.email)}"></label>
+          <label class="field"><span>城市</span><input data-path="location" value="${esc(r.location)}"></label>
+        </div>
+    <label class="field"><span>个人总结 <button class="insert-link" type="button" data-action="polish" data-path="summary" data-kind="summary">✨ AI 润色</button></span><textarea data-path="summary" rows="3">${esc(r.summary)}</textarea></label>
+
+        <div class="sub-title">教育经历 <button class="add-link" type="button" data-action="resume-add-education">＋ 添加</button></div>
+        ${edu || '<div class="muted small">暂无教育经历</div>'}
+
+        <div class="sub-title">实习 / 工作经历 <button class="add-link" type="button" data-action="resume-add-experience">＋ 添加</button></div>
+        ${exp || '<div class="muted small">暂无经历</div>'}
+
+        <div class="sub-title">项目经历 <button class="add-link" type="button" data-action="resume-add-projects">＋ 添加</button></div>
+        ${proj || '<div class="muted small">暂无项目</div>'}
+
+        <label class="field"><span>技能（一行一个）</span><textarea data-path="skills" data-kind="list" rows="3" placeholder="Axure">${esc((r.skills || []).join("\n"))}</textarea></label>
+        <label class="field"><span>荣誉奖项（一行一个）</span><textarea data-path="awards" data-kind="list" rows="3" placeholder="校级优秀学生干部">${esc((r.awards || []).join("\n"))}</textarea></label>
+      `;
+    }
+
+    function addArrayItem(kind) {
+      const r = currentResume();
+      if (!r) return;
+      if (kind === "education") r.education.push({ school: "", degree: "", major: "", time: "" });
+      if (kind === "experience") r.experience.push({ org: "", title: "", time: "", bullets: [] });
+      if (kind === "projects") r.projects.push({ name: "", role: "", time: "", bullets: [] });
+      renderResumeForm();
+      scheduleAutosave();
+    }
+
+    function removeArrayItem(kind, idx) {
+      const r = currentResume();
+      if (!r) return;
+      if (kind === "education") r.education.splice(idx, 1);
+      if (kind === "experience") r.experience.splice(idx, 1);
+      if (kind === "projects") r.projects.splice(idx, 1);
+      renderResumeForm();
+      scheduleAutosave();
+    }
+
+    function saveCurrentResume(showToast = true) {
+      const r = currentResume();
+      if (!r) return;
+      r.updatedAt = Date.now();
+      persistResumes();
+      renderResumeSelect();
+      if (showToast) toast("简历已保存");
+    }
+
+    function scheduleAutosave() {
+      clearTimeout(autosaveTimer);
+      autosaveTimer = setTimeout(() => {
+        persistResumes();
+        const el = $("#autosave-status");
+        if (el) el.textContent = "已自动存档 " + new Date().toLocaleTimeString();
+      }, 800);
+    }
+
+    function scheduleNoteDraftAutosave() {
+      clearTimeout(noteDraftTimer);
+      noteDraftTimer = setTimeout(() => {
+        localStorage.setItem("note_draft", $("#note-input").value);
+      }, 500);
+    }
+
+    function renderPreview() {
+      const r = currentResume();
+      if (!r) { $("#resume-preview").innerHTML = ""; return; }
+      $("#resume-preview").innerHTML = renderResumeHTML(r, currentTemplate);
+    }
+
+    function renderResumeHTML(r, tpl) {
+      const contact = [r.phone, r.email, r.location].filter(Boolean).join(" · ");
+      let head = "";
+      if (tpl === "business") {
+        head = `
+          <header class="r-head">
+            <div>
+              <h1 class="r-name">${esc(r.name || "姓名")}</h1>
+              ${r.target ? `<div class="r-target">${esc(r.target)}</div>` : ""}
+            </div>
+            <div class="r-contact">${esc(contact)}</div>
+          </header>`;
+      } else if (tpl === "modern") {
+        head = `
+          <header class="r-head">
+            <h1 class="r-name">${esc(r.name || "姓名")}</h1>
+            ${r.target ? `<div class="r-target">${esc(r.target)}</div>` : ""}
+            ${contact ? `<div class="r-contact">${esc(contact)}</div>` : ""}
+          </header>`;
+      } else {
+        head = `
+          <header class="r-head">
+            <h1 class="r-name">${esc(r.name || "姓名")}</h1>
+            ${r.target ? `<div class="r-target">${esc(r.target)}</div>` : ""}
+            ${contact ? `<div class="r-contact">${esc(contact)}</div>` : ""}
+          </header>`;
+      }
+
+      const sections = [];
+      if (r.summary) {
+        sections.push(`<section class="r-sec"><h2 class="r-h2">个人总结</h2><p>${esc(r.summary)}</p></section>`);
+      }
+      if ((r.education || []).length) {
+        const items = r.education.map((e) => `
+          <div class="r-item">
+            <div class="r-item-head">
+              <span class="r-item-title">${esc(e.school)}</span>
+              <span class="r-item-time">${esc(e.time)}</span>
+            </div>
+            <div class="r-item-sub">${esc([e.major, e.degree].filter(Boolean).join(" · "))}</div>
+          </div>`).join("");
+        sections.push(`<section class="r-sec"><h2 class="r-h2">教育经历</h2>${items}</section>`);
+      }
+      if ((r.experience || []).length) {
+        const items = r.experience.map((e) => `
+          <div class="r-item">
+            <div class="r-item-head">
+              <span class="r-item-title">${esc(e.title)}</span>
+              <span class="r-item-time">${esc(e.time)}</span>
+            </div>
+            <div class="r-item-sub">${esc(e.org)}</div>
+            ${(e.bullets || []).length ? `<ul>${e.bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul>` : ""}
+          </div>`).join("");
+        sections.push(`<section class="r-sec"><h2 class="r-h2">实习 / 工作经历</h2>${items}</section>`);
+      }
+      if ((r.projects || []).length) {
+        const items = r.projects.map((p) => `
+          <div class="r-item">
+            <div class="r-item-head">
+              <span class="r-item-title">${esc(p.name)}</span>
+              <span class="r-item-time">${esc(p.time)}</span>
+            </div>
+            <div class="r-item-sub">${esc(p.role)}</div>
+            ${(p.bullets || []).length ? `<ul>${p.bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul>` : ""}
+          </div>`).join("");
+        sections.push(`<section class="r-sec"><h2 class="r-h2">项目经历</h2>${items}</section>`);
+      }
+      if ((r.skills || []).length) {
+        const chips = r.skills.map((s) => `<span class="r-chip">${esc(s)}</span>`).join("");
+        sections.push(`<section class="r-sec"><h2 class="r-h2">技能</h2><div class="r-chips">${chips}</div></section>`);
+      }
+      if ((r.awards || []).length) {
+        const items = `<ul>${r.awards.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>`;
+        sections.push(`<section class="r-sec"><h2 class="r-h2">荣誉奖项</h2>${items}</section>`);
+      }
+
+      return `<div class="resume-doc tpl-${tpl}">${head}${sections.join("")}</div>`;
+    }
+
+    function exportResume() {
+      const r = currentResume();
+      if (!r) return;
+      saveCurrentResume(false);
+      printHTML(renderResumeHTML(r, currentTemplate), `tpl-${currentTemplate}`);
+    }
+
+    function printHTML(html, cls) {
+      const slot = $("#print-slot");
+      slot.className = cls || "";
+      slot.innerHTML = html;
+      window.print();
+    }
+
+    function wordEsc(s) {
+      return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+    }
+
+    function resumeToWordHTML(r) {
+      const contact = [r.phone, r.email, r.location].filter(Boolean).join(" · ");
+      let h = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${wordEsc(r.name || "简历")}</title><style>body{font-family:'Microsoft YaHei',SimSun,Arial,sans-serif;font-size:11pt;color:#000;line-height:1.5;}h1{font-size:20pt;text-align:center;margin:0 0 4pt;}h2{font-size:13pt;border-bottom:1pt solid #000;padding-bottom:2pt;margin:12pt 0 4pt;}ul{margin:2pt 0 2pt 18pt;padding:0;}li{margin:2pt 0;}</style></head><body>`;
+      h += `<h1>${wordEsc(r.name || "姓名")}</h1>`;
+      if (r.target) h += `<p style="text-align:center;margin:0 0 2pt;">${wordEsc(r.target)}</p>`;
+      if (contact) h += `<p style="text-align:center;margin:0 0 8pt;color:#555;font-size:9pt;">${wordEsc(contact)}</p>`;
+      if (r.summary) h += `<h2>个人总结</h2><p>${wordEsc(r.summary)}</p>`;
+      if ((r.education || []).length) {
+        h += `<h2>教育经历</h2>`;
+        r.education.forEach((e) => {
+          h += `<p style="margin:2pt 0;"><b>${wordEsc(e.school)}</b>　${wordEsc([e.major, e.degree].filter(Boolean).join(" · "))}　<span style="float:right">${wordEsc(e.time)}</span></p>`;
+        });
+      }
+      if ((r.experience || []).length) {
+        h += `<h2>实习 / 工作经历</h2>`;
+        r.experience.forEach((e) => {
+          h += `<p style="margin:4pt 0 0;"><b>${wordEsc(e.title)}</b>　${wordEsc(e.org)}　<span style="float:right">${wordEsc(e.time)}</span></p>`;
+          if ((e.bullets || []).length) h += `<ul>${e.bullets.map((b) => `<li>${wordEsc(b)}</li>`).join("")}</ul>`;
+        });
+      }
+      if ((r.projects || []).length) {
+        h += `<h2>项目经历</h2>`;
+        r.projects.forEach((p) => {
+          h += `<p style="margin:4pt 0 0;"><b>${wordEsc(p.name)}</b>　${wordEsc(p.role)}　<span style="float:right">${wordEsc(p.time)}</span></p>`;
+          if ((p.bullets || []).length) h += `<ul>${p.bullets.map((b) => `<li>${wordEsc(b)}</li>`).join("")}</ul>`;
+        });
+      }
+      if ((r.skills || []).length) h += `<h2>技能</h2><p>${wordEsc(r.skills.join("、"))}</p>`;
+      if ((r.awards || []).length) h += `<h2>荣誉奖项</h2><ul>${r.awards.map((a) => `<li>${wordEsc(a)}</li>`).join("")}</ul>`;
+      h += `</body></html>`;
+      return h;
+    }
+
+    function downloadWord(html, filename) {
+      const blob = new Blob(["\ufeff", html], { type: "application/msword;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function exportWordResume() {
+      const r = currentResume();
+      if (!r) return;
+      saveCurrentResume(false);
+      downloadWord(resumeToWordHTML(r), `简历-${r.name || "未命名"}.doc`);
+    }
+
+    function exportWordTailor() {
+      if (!tailorResult) return;
+      downloadWord(resumeToWordHTML(tailorResult), `定制简历-${tailorResult.name || "未命名"}.doc`);
+    }
+
+    function openPick(idx) {
+      pickTarget = idx;
+      pickChecked = new Set();
+      renderPick();
+      $("#pick-modal").classList.add("open");
+    }
+
+    function closePick() {
+      $("#pick-modal").classList.remove("open");
+      pickTarget = null;
+    }
+
+    function renderPick() {
+      const box = $("#pick-list");
+      if (!bulletLib.length) {
+        box.innerHTML = '<div class="empty-hint">用语库为空，请先到「经历提炼」生成并保存用语。</div>';
+        return;
+      }
+      box.innerHTML = bulletLib.map((b) => `
+        <label class="pick-item">
+          <input type="checkbox" data-action="pick-toggle" data-id="${b.id}">
+          <span>${esc(b.text)}</span>
+        </label>`).join("");
+    }
+
+    function insertPicked() {
+      if (pickTarget == null) return;
+      const r = currentResume();
+      if (!r || !r.experience[pickTarget]) return;
+      const chosen = bulletLib.filter((b) => pickChecked.has(b.id)).map((b) => b.text);
+      if (!chosen.length) { toast("请先勾选要插入的用语"); return; }
+      const arr = r.experience[pickTarget].bullets || [];
+      r.experience[pickTarget].bullets = [...arr, ...chosen];
+      closePick();
+      renderResumeForm();
+      renderPreview();
+      scheduleAutosave();
+      toast(`已插入 ${chosen.length} 条用语`);
+    }
+
+    async function polishField(path, kind, btn) {
+      const r = currentResume();
+      if (!r) return;
+      const val = getByPath(r, path);
+      let text = "";
+      if (kind === "bullets") {
+        if (!Array.isArray(val) || !val.length) { toast("该处还没有内容可润色"); return; }
+        text = val.join("\n");
+      } else {
+        text = val || "";
+      }
+      if (!text.trim()) { toast("没有内容可润色"); return; }
+      if (btn) btn.disabled = true;
+      try {
+        const data = await api("/api/ai/polish", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, kind }),
+        });
+        if (kind === "bullets") {
+          setByPath(r, path, data.result.split("\n").map((s) => s.trim()).filter(Boolean));
+        } else {
+          setByPath(r, path, data.result);
+        }
+        r.updatedAt = Date.now();
+        renderResumeForm();
+        renderPreview();
+        scheduleAutosave();
+        toast("已润色并应用");
+      } catch (e) {
+        toast("润色失败：" + e.message, true);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function tailorResume() {
+      const jd = $("#tailor-jd").value.trim();
+      if (!jd) { toast("请粘贴岗位要求（JD）"); return; }
+      const pool = $("#tailor-pool").value.trim();
+      if (!resumes.length && !pool) { toast("请先填写简历或经历大汇总"); return; }
+      saveCurrentResume(false);
+
+      const btn = $("#tailor-gen");
+      btn.disabled = true;
+      btn.textContent = "定制中…";
+      $("#tailor-result").innerHTML = '<div class="empty-hint">AI 正在针对岗位要求优化简历，请稍候…</div>';
+      $("#tailor-summary").innerHTML = "";
+      $("#tailor-export").disabled = true;
+      $("#tailor-word").disabled = true;
+      $("#tailor-save").disabled = true;
+      tailorResult = null;
+      try {
+        const data = await api("/api/ai/tailor", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ resumes: resumes.map(resumeToPlain), experience_pool: pool, job_description: jd }),
+        });
+        tailorResult = data.resume;
+        $("#tailor-summary").textContent = data.summary || "";
+        $("#tailor-summary").style.display = data.summary ? "block" : "none";
+        $("#tailor-result").innerHTML = renderResumeHTML(data.resume, currentTemplate);
+        $("#tailor-export").disabled = false;
+        $("#tailor-word").disabled = false;
+        $("#tailor-save").disabled = false;
+      } catch (e) {
+        $("#tailor-result").innerHTML = `<div class="empty-hint">${esc(e.message)}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🎯 生成定制简历";
+      }
+    }
+
+    function exportTailor() {
+      if (!tailorResult) return;
+      printHTML(renderResumeHTML(tailorResult, currentTemplate), `tpl-${currentTemplate}`);
+    }
+
+    function saveTailor() {
+      if (!tailorResult) return;
+      const r = deepCopy(tailorResult);
+      r.id = uid();
+      r.createdAt = r.updatedAt = Date.now();
+      if ($("#tailor-title").value.trim()) r.target = $("#tailor-title").value.trim();
+      resumes.push(r);
+      currentResumeId = r.id;
+      persistResumes();
+      renderResumeSelect();
+      loadResumeById(r.id);
+      toast("定制简历已保存到「简历模板」");
+    }
+
+    function ivItemText(it) {
+      return (it.question || "") + (it.text ? "\n" + it.text : "");
+    }
+
+    function setInterviewMode(mode) {
+      interviewMode = mode;
+      $all(".mode-btn").forEach((b) => b.classList.toggle("active", b.dataset.mode === mode));
+      $("#iv-question-wrap").style.display = mode === "answer" ? "block" : "none";
+      $("#iv-count-wrap").style.display = mode === "answer" ? "none" : "block";
+      const btn = $("#iv-gen");
+      btn.textContent = mode === "answer" ? "💬 生成答案" : (mode === "questions" ? "🔮 设想问题" : "💼 生成面试回答");
+    }
+
+    async function generateInterview() {
+      const experience = $("#iv-experience").value.trim();
+      if (interviewMode === "answer") {
+        if (!$("#iv-question").value.trim()) { toast("请输入面试官的问题"); return; }
+        if (!experience) { toast("请填写你的经历，以便回答更有针对性"); return; }
+      } else {
+        if (!experience) { toast("请先填写你的经历"); return; }
+      }
+
+      const btn = $("#iv-gen");
+      btn.disabled = true;
+      btn.textContent = "生成中…";
+      $("#iv-result").innerHTML = '<div class="empty-hint">AI 正在准备面试内容，请稍候…</div>';
+      try {
+        const data = await api("/api/ai/interview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mode: interviewMode,
+            experience,
+            context: $("#iv-context").value.trim(),
+            question: $("#iv-question").value.trim(),
+            count: Number($("#iv-count").value),
+          }),
+        });
+        renderInterviewResult(data);
+      } catch (e) {
+        $("#iv-result").innerHTML = `<div class="empty-hint">${esc(e.message)}<br><br>如未配置 AI，请点击右上角「⚙️ 设置」。</div>`;
+      } finally {
+        btn.disabled = false;
+        setInterviewMode(interviewMode);
+      }
+    }
+
+    function renderInterviewResult(data) {
+      const box = $("#iv-result");
+      if (interviewMode === "answer") {
+        lastInterview = { mode: "answer", answer: data.answer || "", items: [] };
+        box.innerHTML = `
+          <div class="iv-item">
+            <div class="iv-a">${esc(data.answer || "")}</div>
+            <div class="row" style="margin-top:10px;justify-content:flex-end">
+              <button class="mini" data-action="iv-copy-answer">复制</button>
+            </div>
+          </div>`;
+      } else {
+        lastInterview = { mode: interviewMode, answer: null, items: data.items || [] };
+        if (!lastInterview.items.length) {
+          box.innerHTML = '<div class="empty-hint">没有生成内容。</div>';
+          return;
+        }
+        const label = interviewMode === "questions" ? "答题要点" : "参考回答";
+        box.innerHTML = lastInterview.items.map((it, i) => `
+          <div class="iv-item">
+            <div class="iv-q">${i + 1}. ${esc(it.question)}</div>
+            ${it.text ? `<div class="iv-a-label">${label}</div><div class="iv-a">${esc(it.text)}</div>` : ""}
+            <div class="row" style="margin-top:10px;justify-content:flex-end">
+              <button class="mini" data-action="iv-copy" data-idx="${i}">复制</button>
+            </div>
+          </div>`).join("");
+      }
+    }
+
+    async function copyAllInterview() {
+      const parts = [];
+      if (lastInterview.mode === "answer") {
+        if (lastInterview.answer) parts.push(lastInterview.answer);
+      } else {
+        lastInterview.items.forEach((it) => parts.push(ivItemText(it)));
+      }
+      const out = parts.filter(Boolean).join("\n\n");
+      if (!out) { toast("还没有可复制的内容"); return; }
+      await copyText(out);
+    }
+
+    async function quitApp() {
+      if (!confirm("确定退出「我的笔记」吗？退出后本页面将无法使用。")) return;
+      try {
+        await api("/api/shutdown", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}",
+        });
+      } catch (e) {
+        // 即使请求失败，也给出退出提示
+      }
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:Microsoft YaHei;color:#333;text-align:center"><div><div style="font-size:48px">👋</div><h2>已退出，现在可以关闭这个页面了。</h2><p style="color:#888">下次使用请再次双击桌面的「我的笔记」。</p></div></div>';
+    }
+  </script>
+</body>
+</html>
